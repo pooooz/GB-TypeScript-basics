@@ -1,19 +1,6 @@
-export function renderBlock(elementId: string, html: string) {
-  const element = document.getElementById(elementId);
-  if (element) {
-    element.innerHTML = html;
-  }
-}
+import { renderBlock } from '../helpers/renderBlock.js';
+import { Message, Action } from './interfaces';
 
-interface Message {
-  type: string,
-  text: string,
-}
-
-interface Action {
-  name: string,
-  handler: () => void | null
-}
 export function renderToast(
   message: Message | null,
   action?: Action,

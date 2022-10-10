@@ -1,4 +1,5 @@
 import { renderBlock } from '../helpers/renderBlock.js';
+import { BookingItem } from '../services/interfaces';
 
 export function renderSearchStubBlock() {
   renderBlock(
@@ -24,7 +25,8 @@ export function renderEmptyOrErrorSearchBlock(reasonMessage: string) {
   );
 }
 
-export function renderSearchResultsBlock() {
+export function renderSearchResultsBlock(results: Array<BookingItem>) {
+  console.log(results);
   renderBlock(
     'search-results-block',
     `

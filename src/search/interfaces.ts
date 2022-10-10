@@ -3,3 +3,9 @@ export interface SearchFormData {
   departure: string;
   maxPrice: string;
 }
+
+export interface BookingItemLocalStorage {
+  id: number;
+  name: string;
+  image: string;
+}

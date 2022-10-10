@@ -1,4 +1,4 @@
-import { UserInfo, FavoritesAmount } from './interfaces';
+import { UserInfo } from './interfaces';
 
 export const getUserData = (): UserInfo => {
   const parseString = localStorage.getItem('user');
@@ -8,8 +8,8 @@ export const getUserData = (): UserInfo => {
 };
 
 export const getFavoritesAmount = () => {
-  const parseString = localStorage.getItem('favoritesAmount');
-  if (parseString) return Number(JSON.parse(parseString) as FavoritesAmount);
+  const parseString = localStorage.getItem('favoriteItems');
+  if (parseString) return JSON.parse(parseString).length;
 
   return 0;
 };

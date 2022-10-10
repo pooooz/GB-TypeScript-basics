@@ -1,6 +1,6 @@
 import { renderBlock } from '../helpers/renderBlock.js';
 import { getFormattedDate } from '../helpers/date.js';
-import { renderSearchResultsBlock } from './search-results.js';
+import { renderEmptyOrErrorSearchBlock, renderSearchResultsBlock } from './search-results.js';
 import { parseSearchForm } from './parseSearchForm.js';
 import { getResults } from './getResults.js';
 import { search } from '../services/booking.js';
@@ -51,9 +51,17 @@ export function renderSearchFormBlock(dateFrom: Date, dateTo: Date) {
     try {
       const { arrival, departure, maxPrice } = getResults(parseSearchForm());
 
-      const results = await search(arrival, departure, maxPrice > 0 ? maxPrice : null);
+      const results = await search(
+        arrival,
+        departure,
+        maxPrice > 0 ? maxPrice : null,
+      ) as Array<BookingItem>;
 
-      renderSearchResultsBlock(results as Array<BookingItem>);
+      if (results.length > 0) {
+        renderSearchResultsBlock(results);
+      } else {
+        renderEmptyOrErrorSearchBlock('Нет подходящих предложений');
+      }
     } catch (error) {
       if (error instanceof Error) {
         renderToast({ text: error.message, type: 'error' });

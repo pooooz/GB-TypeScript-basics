@@ -1,4 +1,8 @@
 import { renderBlock } from '../helpers/renderBlock.js';
+import { BookingItem } from '../services/interfaces';
+import { BookingItemLocalStorage } from './interfaces';
+
+// Bad implementation but I have to hurry
 
 export function renderSearchStubBlock() {
   renderBlock(
@@ -24,7 +28,80 @@ export function renderEmptyOrErrorSearchBlock(reasonMessage: string) {
   );
 }
 
-export function renderSearchResultsBlock() {
+const toggleFavoriteItem = (target: HTMLLIElement, id: number, name: string, image: string) => {
+  const attempt = localStorage.getItem('favoriteItems');
+  const favoriteItems: Array<BookingItemLocalStorage> | null = attempt ? JSON.parse(attempt) : null;
+
+  if (!target.classList.contains('active')) {
+    target.classList.toggle('active');
+
+    if (favoriteItems) {
+      const sameId = favoriteItems.find((elem) => elem.id === id);
+
+      if (!sameId) {
+        const newValue = [...favoriteItems, {
+          id, name, image,
+        }];
+        localStorage.setItem('favoriteItems', JSON.stringify(newValue));
+      }
+    } else {
+      localStorage.setItem('favoriteItems', JSON.stringify([{
+        id, name, image,
+      }]));
+    }
+  } else {
+    target.classList.toggle('active');
+
+    if (favoriteItems) {
+      const newValue = favoriteItems.filter((elem) => id !== elem.id);
+      localStorage.setItem('favoriteItems', JSON.stringify(newValue));
+    }
+  }
+};
+
+const createBookingItem = ({
+  id, name, description, price, image, remoteness,
+}: BookingItem) => {
+  const elem = document.createElement('li');
+
+  const attempt = localStorage.getItem('favoriteItems');
+  const favoriteItems: Array<BookingItemLocalStorage> | null = attempt ? JSON.parse(attempt) : null;
+  const sameId = favoriteItems?.find((item) => item.id === id);
+
+  elem.innerHTML = `
+    <div class="result-container" data-id=${id}>
+      <div class="result-img-container">
+        <div class="favorites ${sameId ? 'active' : ''}"></div>
+        <img class="result-img" src=${image} alt="">
+      </div>
+      <div class="result-info">
+        <div class="result-info--header">
+          <p>${name}</p>
+          <p class="price">${price}&#8381;</p>
+        </div>
+        <div class="result-info--map"><i class="map-icon"></i> ${remoteness}км от вас</div>
+        <div class="result-info--descr">${description}</div>
+        <div class="result-info--footer">
+          <div>
+            <button>Забронировать</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  elem.classList.add('result');
+
+  elem.addEventListener('click', (event) => {
+    const target = (event.target as HTMLLIElement);
+    if (target.classList.contains('favorites')) {
+      toggleFavoriteItem(target, id, name, image);
+    }
+  });
+
+  return elem;
+};
+
+export const renderSearchResultsBlock = (results: Array<BookingItem>) => {
   renderBlock(
     'search-results-block',
     `
@@ -39,50 +116,13 @@ export function renderSearchResultsBlock() {
             </select>
         </div>
     </div>
-    <ul class="results-list">
-      <li class="result">
-        <div class="result-container">
-          <div class="result-img-container">
-            <div class="favorites active"></div>
-            <img class="result-img" src="./img/result-1.png" alt="">
-          </div>
-          <div class="result-info">
-            <div class="result-info--header">
-              <p>YARD Residence Apart-hotel</p>
-              <p class="price">13000&#8381;</p>
-            </div>
-            <div class="result-info--map"><i class="map-icon"></i> 2.5км от вас</div>
-            <div class="result-info--descr">Комфортный апарт-отель в самом сердце Санкт-Петербрга. К услугам гостей номера с видом на город и бесплатный Wi-Fi.</div>
-            <div class="result-info--footer">
-              <div>
-                <button>Забронировать</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </li>
-      <li class="result">
-        <div class="result-container">
-          <div class="result-img-container">
-            <div class="favorites"></div>
-            <img class="result-img" src="./img/result-2.png" alt="">
-          </div>
-          <div class="result-info">
-            <div class="result-info--header">
-              <p>Akyan St.Petersburg</p>
-              <p class="price">13000&#8381;</p>
-            </div>
-            <div class="result-info--map"><i class="map-icon"></i> 1.1км от вас</div>
-            <div class="result-info--descr">Отель Akyan St-Petersburg с бесплатным Wi-Fi на всей территории расположен в историческом здании Санкт-Петербурга.</div>
-            <div class="result-info--footer">
-              <div>
-                <button>Забронировать</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </li>
-    </ul>
+    <ul class="results-list"></ul>
     `,
   );
-}
+
+  const resultsList = document.querySelector('.results-list');
+  results.forEach((elem) => {
+    const l = createBookingItem(elem);
+    resultsList?.appendChild(l);
+  });
+};

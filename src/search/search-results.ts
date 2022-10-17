@@ -28,7 +28,7 @@ export function renderEmptyOrErrorSearchBlock(reasonMessage: string) {
   );
 }
 
-const toggleFavoriteItem = (target: HTMLLIElement, id: number, name: string, image: string) => {
+const toggleFavoriteItem = (target: HTMLLIElement, id: number | string, name: string, image: string) => {
   const attempt = localStorage.getItem('favoriteItems');
   const favoriteItems: Array<BookingItemLocalStorage> | null = attempt ? JSON.parse(attempt) : null;
 
@@ -79,7 +79,7 @@ const createBookingItem = ({
           <p>${name}</p>
           <p class="price">${price}&#8381;</p>
         </div>
-        <div class="result-info--map"><i class="map-icon"></i> ${remoteness}км от вас</div>
+        <div class="result-info--map"><i class="map-icon"></i> ${remoteness} км от вас</div>
         <div class="result-info--descr">${description}</div>
         <div class="result-info--footer">
           <div>

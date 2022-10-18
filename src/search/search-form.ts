@@ -4,8 +4,10 @@ import { renderEmptyOrErrorSearchBlock, renderSearchResultsBlock } from './searc
 import { parseSearchForm } from './parseSearchForm.js';
 import { getResults } from './getResults.js';
 import { search } from '../services/booking.js';
+import { FlatRentSdk } from '../sdk/flat-rent-sdk.js';
 import { renderToast } from '../toast';
 import { BookingItem } from '../services/interfaces';
+import { formatRentItems } from '../helpers/formatRentItems.js';
 
 const FROM_CLASS_NAME = 'search-form';
 export function renderSearchFormBlock(dateFrom: Date, dateTo: Date) {
@@ -57,8 +59,29 @@ export function renderSearchFormBlock(dateFrom: Date, dateTo: Date) {
         maxPrice > 0 ? maxPrice : null,
       ) as Array<BookingItem>;
 
+      const rent = new FlatRentSdk();
+
+      const resultsFromSDK = await rent.search({
+        city: 'Санкт-Петербург',
+        checkInDate: arrival,
+        checkOutDate: departure,
+        priceLimit: maxPrice,
+      });
+
       if (results.length > 0) {
-        renderSearchResultsBlock(results);
+        navigator.geolocation.getCurrentPosition((data) => {
+          renderSearchResultsBlock([...results, ...formatRentItems(resultsFromSDK, data.coords)]);
+        }, () => {
+          renderSearchResultsBlock(
+            [
+              ...results,
+              ...formatRentItems(
+                resultsFromSDK,
+                { latitude: 0, longitude: 0 } as GeolocationCoordinates,
+              ),
+            ],
+          );
+        });
       } else {
         renderEmptyOrErrorSearchBlock('Нет подходящих предложений');
       }

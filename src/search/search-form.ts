@@ -3,11 +3,8 @@ import { getFormattedDate } from '../helpers/date.js';
 import { renderEmptyOrErrorSearchBlock, renderSearchResultsBlock } from './search-results.js';
 import { parseSearchForm } from './parseSearchForm.js';
 import { getResults } from './getResults.js';
-import { search } from '../services/booking.js';
-import { FlatRentSdk } from '../sdk/flat-rent-sdk.js';
 import { renderToast } from '../toast';
-import { BookingItem } from '../services/interfaces';
-import { formatRentItems } from '../helpers/formatRentItems.js';
+import { getInfoFromSources } from './getInfoFromSources.js';
 
 const FROM_CLASS_NAME = 'search-form';
 export function renderSearchFormBlock(dateFrom: Date, dateTo: Date) {
@@ -53,35 +50,18 @@ export function renderSearchFormBlock(dateFrom: Date, dateTo: Date) {
     try {
       const { arrival, departure, maxPrice } = getResults(parseSearchForm());
 
-      const results = await search(
-        arrival,
-        departure,
-        maxPrice > 0 ? maxPrice : null,
-      ) as Array<BookingItem>;
+      let coords = {
+        latitude: 0,
+        longitude: 0,
+      } as GeolocationCoordinates;
 
-      const rent = new FlatRentSdk();
-
-      const resultsFromSDK = await rent.search({
-        city: 'Санкт-Петербург',
-        checkInDate: arrival,
-        checkOutDate: departure,
-        priceLimit: maxPrice,
+      navigator.geolocation.getCurrentPosition((data) => {
+        coords = data.coords;
       });
 
-      if (results.length > 0) {
-        navigator.geolocation.getCurrentPosition((data) => {
-          renderSearchResultsBlock([...results, ...formatRentItems(resultsFromSDK, data.coords)]);
-        }, () => {
-          renderSearchResultsBlock(
-            [
-              ...results,
-              ...formatRentItems(
-                resultsFromSDK,
-                { latitude: 0, longitude: 0 } as GeolocationCoordinates,
-              ),
-            ],
-          );
-        });
+      const results = await getInfoFromSources(arrival, departure, maxPrice, coords);
+      if (results.length) {
+        renderSearchResultsBlock(results);
       } else {
         renderEmptyOrErrorSearchBlock('Нет подходящих предложений');
       }

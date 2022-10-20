@@ -9,3 +9,5 @@ export interface BookingItemLocalStorage {
   name: string;
   image: string;
 }
+
+export type SortValues = 'expensive' | 'cheap' | 'near'

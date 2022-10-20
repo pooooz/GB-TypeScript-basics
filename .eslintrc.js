@@ -32,12 +32,12 @@ module.exports = {
       'error',
       'ignorePackages',
       {
-        js: 'never',
         jsx: 'never',
         ts: 'never',
         tsx: 'never',
       },
     ],
     'import/prefer-default-export': 0,
+    'no-param-reassign': 0,
   },
 };

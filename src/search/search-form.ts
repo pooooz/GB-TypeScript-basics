@@ -68,20 +68,17 @@ export function renderSearchFormBlock(dateFrom: Date, dateTo: Date) {
         priceLimit: maxPrice,
       });
 
+      let coords = {
+        latitude: 0,
+        longitude: 0,
+      } as GeolocationCoordinates;
+
       if (results.length > 0) {
         navigator.geolocation.getCurrentPosition((data) => {
-          renderSearchResultsBlock([...results, ...formatRentItems(resultsFromSDK, data.coords)]);
-        }, () => {
-          renderSearchResultsBlock(
-            [
-              ...results,
-              ...formatRentItems(
-                resultsFromSDK,
-                { latitude: 0, longitude: 0 } as GeolocationCoordinates,
-              ),
-            ],
-          );
+          coords = data.coords;
         });
+
+        renderSearchResultsBlock([...results, ...formatRentItems(resultsFromSDK, coords)]);
       } else {
         renderEmptyOrErrorSearchBlock('Нет подходящих предложений');
       }

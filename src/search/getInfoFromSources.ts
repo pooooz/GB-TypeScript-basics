@@ -8,7 +8,7 @@ export const getInfoFromSources = async (
   departure: Date,
   maxPrice: number,
   coords: GeolocationCoordinates,
-) => {
+): Promise<Array<BookingItem>> => {
   const results = await search(
     arrival,
     departure,

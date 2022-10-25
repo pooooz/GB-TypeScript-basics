@@ -22,7 +22,7 @@ export const formatRentItems = (
   ...item,
   name: item.title,
   description: item.details,
-  image: item.photos[0],
+  image: item.photos[0] as string,
   price: item.totalPrice,
   remoteness: getDistance(coords, item.coordinates as [number, number]),
 }));
